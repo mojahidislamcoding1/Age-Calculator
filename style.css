@@ -15,7 +15,7 @@
   --radius-sm: 14px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 html, body {
   height: 100%;
@@ -131,20 +131,31 @@ body {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: stretch;
 }
 .input-wrap input[type="date"] {
   flex: 1 1 220px;
   min-width: 0;
+  width: 100%;
+  max-width: 100%;
   padding: 14px 16px;
+  min-height: 48px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--card-border);
   background: rgba(255,255,255,0.05);
   color: var(--text);
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 1rem; /* >=16px prevents iOS zoom */
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   color-scheme: dark;
+}
+.input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.8;
+  filter: invert(1);
+  width: 20px;
+  height: 20px;
 }
 .input-wrap input[type="date"]:focus {
   border-color: var(--accent-1);
@@ -154,15 +165,19 @@ body {
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 14px 22px;
+  min-height: 48px;
   border: none;
   border-radius: var(--radius-sm);
   font-family: inherit;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
+  touch-action: manipulation;
   transition: transform 0.15s, box-shadow 0.2s, filter 0.2s;
+  white-space: nowrap;
 }
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
@@ -315,7 +330,7 @@ body {
 }
 .extra-icon { font-size: 1.6rem; }
 .extra-title { font-size: 12px; color: var(--muted); font-weight: 500; }
-.extra-value { font-size: 1rem; font-weight: 600; margin-top: 2px; }
+.extra-value { font-size: 1rem; font-weight: 600; margin-top: 2px; overflow-wrap: anywhere; }
 
 .footer {
   text-align: center;
@@ -337,14 +352,99 @@ body {
   75% { transform: translateX(6px); }
 }
 
-@media (max-width: 560px) {
+/* ============ Responsive ============ */
+
+/* Touch devices: disable hover transforms that cause stuck states */
+@media (hover: none) {
+  .card:hover { transform: none; }
+  .stat:hover { transform: none; }
+  .chip:hover { transform: none; }
+  .btn-primary:hover { transform: none; }
+}
+
+/* Large tablets */
+@media (max-width: 768px) {
+  body { padding: 24px 12px; }
+  .container { gap: 18px; }
+  .card { padding: 24px; border-radius: 20px; }
+  .orb-1, .orb-2 { width: 280px; height: 280px; }
+  .orb-3 { width: 200px; height: 200px; }
+  .stats-grid { gap: 8px; }
+  .stat { padding: 12px 4px; }
+  .extras { gap: 10px; }
+}
+
+/* Tablets / small laptops */
+@media (max-width: 640px) {
   .stats-grid { grid-template-columns: repeat(3, 1fr); }
   .extras { grid-template-columns: 1fr; }
-  .card { padding: 20px; }
   .input-wrap { flex-direction: column; }
-  .btn { justify-content: center; }
+  .input-wrap input[type="date"] { flex: 1 1 100%; }
+  .btn { width: 100%; justify-content: center; }
+  .quick-actions { justify-content: center; }
+  .chip { flex: 1 1 auto; text-align: center; }
 }
-@media (max-width: 380px) {
+
+/* Phones */
+@media (max-width: 560px) {
+  body { padding: 16px 10px; }
+  .container { gap: 16px; }
+  .card { padding: 18px; border-radius: 18px; }
+  .hero h1 { letter-spacing: -0.5px; }
+  .subtitle { font-size: 0.95rem; }
+  .big-number { letter-spacing: -2px; }
+  .stat-value { font-size: clamp(1rem, 4vw, 1.4rem); }
+  .stat-label { font-size: 10px; }
+  .extra { padding: 12px; gap: 10px; }
+  .extra-value { font-size: 0.95rem; }
+  .footer { font-size: 12px; }
+  .hint { font-size: 12px; }
+  .orb { opacity: 0.4; filter: blur(40px); }
+}
+
+/* Small phones */
+@media (max-width: 420px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .result-head { flex-wrap: wrap; gap: 8px; }
+  .live-badge { margin-left: auto; }
+  .quick-actions .chip { font-size: 12px; padding: 7px 10px; }
 }
+
+/* Very small phones */
+@media (max-width: 360px) {
+  body { padding: 12px 8px; }
+  .card { padding: 14px; }
+  .big-age { padding: 14px 0 18px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .stat { padding: 10px 4px; }
+  .input-wrap input[type="date"] { padding: 12px 14px; min-height: 44px; }
+  .btn { padding: 12px 16px; min-height: 44px; }
+}
+
+/* Landscape phones: keep input row side-by-side if enough width */
+@media (orientation: landscape) and (max-height: 500px) {
+  body { padding: 12px; align-items: flex-start; }
+  .container { gap: 12px; }
+  .card { padding: 16px; }
+  .big-number { font-size: clamp(3rem, 8vw, 5rem); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .bg-orbs { display: none; }
+}
+
+/* Print */
+@media print {
+  body { background: #fff; color: #000; }
+  .bg-orbs { display: none; }
+  .card { box-shadow: none; border: 1px solid #ccc; background: #fff; }
+  .gradient-text { color: #000; background: none; -webkit-text-fill-color: #000; }
+}
+
 
